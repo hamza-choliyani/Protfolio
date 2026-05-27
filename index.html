@@ -715,6 +715,7 @@ footer{
   .skills-categories{grid-template-columns:1fr}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -1069,24 +1070,25 @@ footer{
       <div class="contact-form">
         <div class="form-row">
           <label>Your Name</label>
-          <input type="text" placeholder="John Doe" />
+          <input type="text" id="from_name" placeholder="John Doe" />
         </div>
         <div class="form-row">
           <label>Email Address</label>
-          <input type="email" placeholder="john@example.com" />
+          <input type="email" id="from_email" placeholder="john@example.com" />
         </div>
         <div class="form-row">
           <label>Subject</label>
-          <input type="text" placeholder="Project Inquiry / Collaboration" />
+          <input type="text" id="title" placeholder="Project Inquiry / Collaboration" />
         </div>
         <div class="form-row">
           <label>Message</label>
-          <textarea rows="5" placeholder="Tell me about your project or idea..."></textarea>
+          <textarea rows="5" id="message" placeholder="Tell me about your project or idea..."></textarea>
         </div>
-        <button class="btn-primary" style="width:100%;justify-content:center;border:none;font-family:'Poppins',sans-serif" onclick="alert('Connect a backend (e.g. EmailJS) to enable sending!')">
+        <button class="btn-primary" id="sendBtn" style="width:100%;justify-content:center;border:none;font-family:'Poppins',sans-serif" onclick="sendEmail()">
           Send Message
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
+        <p id="formMsg" style="text-align:center;margin-top:1rem;font-size:0.85rem;display:none;"></p>
       </div>
     </div>
   </div>
@@ -1184,6 +1186,52 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
   });
 });
+
+// EMAILJS
+emailjs.init('_pqqetyhikzQGWRLE');
+
+function sendEmail() {
+  const name = document.getElementById('from_name').value.trim();
+  const email = document.getElementById('from_email').value.trim();
+  const subject = document.getElementById('title').value.trim();
+  const message = document.getElementById('message').value.trim();
+  const btn = document.getElementById('sendBtn');
+  const msg = document.getElementById('formMsg');
+
+  if (!name || !email || !subject || !message) {
+    msg.style.display = 'block';
+    msg.style.color = '#f87171';
+    msg.textContent = '⚠️ Please fill in all fields.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  msg.style.display = 'none';
+
+  emailjs.send('service_6u4zldp', 'template_dbmhu5u', {
+    name: name,
+    email: email,
+    title: subject,
+    message: message
+  }).then(() => {
+    msg.style.display = 'block';
+    msg.style.color = '#4ade80';
+    msg.textContent = '✅ Message sent successfully! I will get back to you soon.';
+    btn.textContent = 'Send Message';
+    btn.disabled = false;
+    document.getElementById('from_name').value = '';
+    document.getElementById('from_email').value = '';
+    document.getElementById('title').value = '';
+    document.getElementById('message').value = '';
+  }, (error) => {
+    msg.style.display = 'block';
+    msg.style.color = '#f87171';
+    msg.textContent = '❌ Failed to send. Please try again or email directly.';
+    btn.textContent = 'Send Message';
+    btn.disabled = false;
+  });
+}
 </script>
 </body>
 </html>
